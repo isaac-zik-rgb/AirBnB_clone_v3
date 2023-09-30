@@ -86,3 +86,40 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json"""
+
+    def test_get_with_correct_ID_class(self):
+        """Test that get method can get object properly, with right id class"""
+        test_state_dict = {"id": "123456", "name": "new_state"}
+        test_state = State(**test_state_dict)
+        test_state.save()
+        new_state = models.storage.get(State, "123456")
+        self.assertEqual(new_state.name, "new_state")
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_get_with_invalid_ID_class(self):
+        test_state_dict = {"id": "123456", "name": "new_state"}
+        test_state = State(**test_state_dict)
+        models.storage.save()
+        new_state = models.storage.get("WrongState", "123456")
+        self.assertIs(new_state, None)
+        new_sate_1 = models.storage.get(State, "WrongID")
+        self.assertIs(new_state_1, None)
+
+        @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+        def test_count_with_class(self):
+            """test count method with class passed in"""
+            count_before = models.storage.count(State)
+            test_state_dict = {"id": "1234567", "name": "new_state_1"}
+            test_state = State(**test_state_dict)
+            test_state.save()
+            count_after = models.storage.count(State)
+            self.assertEqual(count_after - count_before, 1)
+
+        @unittest.skipIf(models.storage_t != 'db' "not testing db storage")
+        def test_count_all(self):
+            """test count all objects of all class"""
+            count = models.storage.count()
+            count_all = 0
+            for classname in classes.values():
+                count_all = count_all + models.storage.count(classname)
+            self.assertEqual(count, count_all)
